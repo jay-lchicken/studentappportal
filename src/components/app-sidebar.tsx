@@ -39,72 +39,24 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: LayoutDashboardIcon,
     },
     {
+      title: "Homework",
+      url: "/homework",
+      icon: FolderIcon,
+    },
+    {
       title: "Classes",
-      url: "#",
+      url: "/classes",
       icon: ListIcon,
     },
     {
       title: "Exams",
-      url: "#",
+      url: "/exams",
       icon: BarChartIcon,
-    },
-    {
-      title: "Homework",
-      url: "#",
-      icon: FolderIcon,
     }
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: CameraIcon,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: FileTextIcon,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: FileCodeIcon,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
   ],
   navSecondary: [
     {
@@ -129,7 +81,7 @@ export function AppSidebar(
             >
               <a href="#">
                 <ArrowUpCircleIcon className="h-5 w-5" />
-                <span className="text-base font-semibold">A Good Name Inc.</span>
+                <span className="text-base font-semibold">Koko</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -139,6 +91,7 @@ export function AppSidebar(
         <NavMain items={data.navMain} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
+
       <SidebarFooter>
         <NavUser user={data.user} name={name} email={email} />
       </SidebarFooter>
