@@ -15,19 +15,29 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {useEffect} from "react";
 import {toast} from "sonner";
+import {LoadingButton} from "@/components/ui/loading-button";
 export function NewClassDialog() {
   const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    setIsLoading(true);
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const name = String(formData.get("name") ?? "");
 
-    // Optionally POST to an API route here:
-    // await fetch("/api/classes", { method: "POST", body: JSON.stringify({ name }) });
+    const result = await fetch("/api/newclass", { method: "POST", body: JSON.stringify({ class_name: name }) });
+    if (!result?.ok) {
+      setIsLoading(false);
+      toast.error("There was an error creating the class.");
+      return;
+    }
+    setIsLoading(false);
+    toast.success("Class has been created.")
+    window.location.reload();
 
-    toast("Class has been created.")
 
     setOpen(false);
   }
@@ -56,7 +66,7 @@ export function NewClassDialog() {
             <DialogClose asChild>
               <Button type="button" variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="submit">Add</Button>
+            <LoadingButton type="submit" loading={isLoading}>Add</LoadingButton>
           </DialogFooter>
         </form>
       </DialogContent>
