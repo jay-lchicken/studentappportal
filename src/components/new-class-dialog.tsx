@@ -27,7 +27,6 @@ export function NewClassDialog() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const name = String(formData.get("name") ?? "");
-
     const result = await fetch("/api/newclass", { method: "POST", body: JSON.stringify({ class_name: name }) });
     if (!result?.ok) {
       setIsLoading(false);
