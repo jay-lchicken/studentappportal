@@ -47,7 +47,8 @@ export async function POST(req) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
-
+  const body = await req.json();
+    const { class_name } = body;
   const email = decoded.email;
   const userId = decoded.sub;
   const name = decoded.name;
@@ -59,10 +60,10 @@ export async function POST(req) {
   const hash = crypto.createHash("sha256").update(email + userId).digest("hex");
   try {
     const classes = await pool.query(
-      `INSERT INTO assignments (creator_userid, name)
+      `INSERT INTO assignments (creator_userid, name, class_name)
        VALUES ($1, $2, $3)
        RETURNING *`,
-      [hash,name]
+      [hash,name, class_name]
     );
     return NextResponse.json(classes.rows);
   } catch (err) {
