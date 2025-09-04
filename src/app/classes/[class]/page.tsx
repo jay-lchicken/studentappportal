@@ -17,11 +17,8 @@ import {LoadingButton} from "@/components/ui/loading-button";
 import ClassSettings from "@/components/class-settings";
 import {MembersTable} from "@/components/members-table";
 
-type PageProps = {
-  params: { class: string }
-}
 
-export default async function Page({ params }: PageProps) {
+export default async function Page({ params }: { params: { class: string } }) {
   noStore()
 
   const session = await auth0.getSession()
