@@ -1,17 +1,52 @@
+"use client"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-
+import {usePathname} from "next/navigation";
+import {Slash} from "lucide-react";
+import {
+    Breadcrumb,
+    BreadcrumbEllipsis,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 export function SiteHeader({title}: {title?: string}) {
-  return (
-    <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
-      <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
-        <SidebarTrigger className="-ml-1" />
-        <Separator
-          orientation="vertical"
-          className="mx-2 data-[orientation=vertical]:h-4"
-        />
-        <h1 className="text-base font-medium">{title}</h1>
-      </div>
-    </header>
-  )
+    const pathname = usePathname();
+    const secondPath = pathname.split('/')[2];
+
+
+    return (
+        <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
+            <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+                <SidebarTrigger className="-ml-1" />
+                <Separator
+                    orientation="vertical"
+                    className="mx-2 data-[orientation=vertical]:h-4"
+                />
+                <Breadcrumb>
+                    <BreadcrumbList>
+                        <BreadcrumbItem>
+                            {title ? (
+                                <BreadcrumbLink href={`/${pathname.split('/')[1]}`}>{title}</BreadcrumbLink>
+                            ) : (
+                                <BreadcrumbEllipsis />
+                            )}    </BreadcrumbItem>
+
+                        {secondPath && <>
+                            <BreadcrumbSeparator />
+
+                            <BreadcrumbItem>
+
+                                <BreadcrumbLink href={`/${pathname.split('/')[1]}/${secondPath}`}>{secondPath}</BreadcrumbLink>
+                            </BreadcrumbItem>
+                        </>}
+
+                    </BreadcrumbList>
+                </Breadcrumb>
+
+            </div>
+        </header>
+    )
 }

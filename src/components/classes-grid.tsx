@@ -2,16 +2,17 @@ import {Card, CardDescription, CardHeader, CardTitle} from "@/components/ui/card
 import pool from "@/lib/db";
 import {ArrowRight} from "lucide-react";
 import {Button} from "@/components/ui/button";
+import {GoToClass} from "@/components/go-to-class";
 
-export default async function ClassesGrid() {
+export default async function ClassesGrid({hash}: { hash: string }) {
     const { rows } = await pool.query(
         `SELECT * FROM class_user
                            JOIN classes ON class_user.class_id = classes.id
          WHERE class_user.hash_userid = $1`,
-        ['493bffad6157234c17ca2abfb123b66676b046d145d12ca3ae77085a4a608251']
+        [hash]
     );
     if (rows.length === 0) {
-        return <div className="p-4">No classes found.</div>;
+        return <div className="p-4 ml-1">No classes found.</div>;
     }
 
     return (
@@ -23,8 +24,10 @@ export default async function ClassesGrid() {
                             <CardTitle>{row.class_name}</CardTitle>
                             <CardDescription>Creator: {row.name || "No name"}</CardDescription>
 
+
+
                         </CardHeader>
-                        <Button size={"icon"} variant={"outline"} className={"mr-4"}><ArrowRight/></Button>
+                        <GoToClass url={`classes/${row.id}`}/>
                     </div>
 
 

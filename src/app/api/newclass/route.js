@@ -34,10 +34,10 @@ export async function POST(req) {
       [hash, name, class_name]
     );
     const userClass = await pool.query(
-      `INSERT INTO class_user (hash_userid, class_id)
-       VALUES ($1, $2)
+      `INSERT INTO class_user (hash_userid, class_id, email, isadmin, name)
+       VALUES ($1, $2, $3, true, $4)
        RETURNING *`,
-      [hash, classes.rows[0].id]
+      [hash, classes.rows[0].id, email, name]
     );
 
     return NextResponse.json(classes.rows);

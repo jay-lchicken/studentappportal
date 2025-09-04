@@ -30,7 +30,7 @@ export function NewClassDialog() {
     const result = await fetch("/api/newclass", { method: "POST", body: JSON.stringify({ class_name: name }) });
     if (!result?.ok) {
       setIsLoading(false);
-      toast.error("There was an error creating the class.");
+      toast.error("There was an error creating the [class].");
       return;
     }
     setIsLoading(false);
