@@ -10,7 +10,7 @@ export default function ClassSettings({cls}: {cls: {id: string, class_name: stri
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     async function saveSettings(e: React.FormEvent<HTMLFormElement>) {
-
+        e.preventDefault(); // Prevent page refresh
         setIsLoading(true);
         const formData = new FormData(e.currentTarget);
         const name = String(formData.get("name") ?? "");
@@ -20,11 +20,10 @@ export default function ClassSettings({cls}: {cls: {id: string, class_name: stri
             setIsLoading(false);
             toast.error("There was an error saving the settings.");
             return;
-        }else{
-
+        } else {
             setIsLoading(false);
-            toast.success("Settings Saved.")
-
+            toast.success("Settings Saved.");
+            window.location.reload();
         }
     }
 
