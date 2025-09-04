@@ -18,7 +18,12 @@ import ClassSettings from "@/components/class-settings";
 import {MembersTable} from "@/components/members-table";
 
 
-export default async function Page({ params }: { params: { class: string } }) {
+
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ class: string }>
+}) {
   noStore()
 
   const session = await auth0.getSession()
@@ -28,7 +33,7 @@ export default async function Page({ params }: { params: { class: string } }) {
 
 
   const user = session.user
-  const classId = params.class?.trim()
+  const classId = (await params).class?.trim()
   if (!classId) notFound()
 
   const hash_email_userid = crypto
