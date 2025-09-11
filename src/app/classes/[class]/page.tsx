@@ -18,6 +18,8 @@ import ClassSettings from "@/components/class-settings";
 import {MembersTable} from "@/components/members-table";
 import {NewMemberDialog} from "@/components/new-member-dialog";
 import ClassSettingsGallery from "@/components/class-settings-gallery";
+import {NextResponse} from "next/server";
+import {minioClient} from "@/lib/upload";
 
 
 
@@ -54,7 +56,7 @@ export default async function Page({
     const { rows } = await pool.query(
         `
             SELECT classes.id,
-                   classes.class_name, class_user.isadmin
+                   classes.class_name, class_user.isadmin, classes.logo_path
             FROM class_user
                      JOIN classes ON class_user.class_id = classes.id
             WHERE class_user.hash_userid = $1
@@ -71,7 +73,9 @@ export default async function Page({
     const cls = rows[0] as {
         id: string
         class_name: string
+        logo_path: string
     }
+    console.log(cls.logo_path)
     const isAdmin = rows[0].isadmin;
     const { rows: memberRows } = await pool.query(
         `
@@ -83,23 +87,31 @@ export default async function Page({
         [classId]
     )
     const members = memberRows as Member[]
+    const classResult = await pool.query(
+        `SELECT logo_path FROM classes WHERE id = $1`,
+        [classId]
+    );
+    const logoPath = classResult.rows[0].logo_path;
+    console.log(logoPath)
+    var logoURL = "";
+    if (!logoPath) {
+        logoURL = ""
+    }else{
+        try {
+            const presignedUrl = await minioClient.presignedGetObject('changemakers', logoPath, 60 * 60);
+            console.log(presignedUrl)
+            logoURL = presignedUrl;
+
+        } catch (minioError) {
+            console.error("MinIO presigned URL error:", minioError);
+            logoURL = "";
+        }
+    }
 
 
 
-    // If you have a members table you can populate this;
-    // for now we show an empty state with a CTA.
-    // Example (uncomment + adapt once you have users):
-    // const { rows: memberRows } = await pool.query(
-    //   `
-    //     SELECT u.id, u.name, u.email
-    //     FROM class_user cu
-    //     JOIN users u ON u.hash_userid = cu.hash_userid
-    //     WHERE cu.class_id = $1
-    //     ORDER BY u.name NULLS LAST, u.email ASC;
-    //   `,
-    //   [classId]
-    // )
-    // const members = memberRows as Array<{ id: string; name: string | null; email: string }>
+
+
 
     return (
         <SidebarProvider>
@@ -117,8 +129,7 @@ export default async function Page({
                     <Separator className="my-2" />
 
                     {isAdmin && <ClassSettings cls={cls}></ClassSettings>}
-                    {isAdmin && <ClassSettingsGallery cls={cls}/>}
-
+                    {isAdmin && <ClassSettingsGallery cls={cls} logo_path={logoURL}/>}
                     {isAdmin && (<Card>
                         <CardHeader className="flex flex-row items-start justify-between space-y-0">
                             <div>
