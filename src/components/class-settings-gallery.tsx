@@ -57,7 +57,7 @@ export default function ClassSettingsGallery({cls}: {cls: {id: string, class_nam
                         <DropzoneEmptyState />
                         <DropzoneContent />
                     </Dropzone>
-                    <div className="w-80 min-h-full flex flex-col justify-center items-center border border-gray-300 rounded-md ml-4 bg-white">
+                    <div className="w-80 min-h-full flex flex-col justify-center items-center border border-border rounded-md ml-4 bg-background">
                         {files && files.length > 0 ? (
                             files.map((file, idx) => (
                                 <img
