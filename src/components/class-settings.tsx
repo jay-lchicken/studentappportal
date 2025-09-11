@@ -42,7 +42,10 @@ export default function ClassSettings({cls}: {cls: {id: string, class_name: stri
                 </CardHeader>
                 <CardContent>
                     <Input type="text" name={"name"} placeholder="Class Name" value={className} onChange={(event) => setClassName(event.target.value)} />
+
+
                 </CardContent>
+
             </form>
         </Card>
     );
