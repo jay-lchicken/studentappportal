@@ -3,6 +3,7 @@ import { NextResponse, NextRequest } from "next/server";
 import pool from "../../../lib/db";
 import * as crypto from "node:crypto";
 import { minioClient } from "../../../lib/upload";
+import redis from "../../../lib/redis";
 
 export async function POST(req) {
   const session = await auth0.getSession();
@@ -67,6 +68,7 @@ export async function POST(req) {
       `UPDATE classes SET logo_path = $1 WHERE id = $2`,
       [fileName, class_id]
     );
+
 
     return NextResponse.json({
       success: true,

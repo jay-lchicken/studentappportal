@@ -11,9 +11,7 @@ export default function ClassSettingsGallery({cls, logo_path}: {cls: {id: string
     const [imageError, setImageError] = useState(false);
 
 
-    useEffect(() => {
-        console.log('Logo path:', logo_path);
-    }, [logo_path]);
+
 
     const handleDrop = (files: File[]) => {
         console.log(files);
@@ -21,12 +19,10 @@ export default function ClassSettingsGallery({cls, logo_path}: {cls: {id: string
     };
 
     const handleImageError = () => {
-        console.error('Failed to load image:', logo_path);
         setImageError(true);
     };
 
     const handleImageLoad = () => {
-        console.log('Image loaded successfully:', logo_path);
         setImageError(false);
     };
 

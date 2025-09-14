@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Separator } from "@/components/ui/separator"
 
 import { Input } from "@/components/ui/input"
+import redis from '@/lib/redis';
 
 import { auth0 } from "@/lib/auth0"
 import pool from "@/lib/db"
@@ -20,6 +21,7 @@ import {NewMemberDialog} from "@/components/new-member-dialog";
 import ClassSettingsGallery from "@/components/class-settings-gallery";
 import {NextResponse} from "next/server";
 import {minioClient} from "@/lib/upload";
+import {red} from "next/dist/lib/picocolors";
 
 
 
@@ -98,9 +100,24 @@ export default async function Page({
         logoURL = ""
     }else{
         try {
-            const presignedUrl = await minioClient.presignedGetObject('changemakers', logoPath, 60 * 60);
-            console.log(presignedUrl)
-            logoURL = presignedUrl;
+            let url = await redis.get(logoPath);
+            if (url) {
+                logoURL = JSON.parse(url);
+                console.log("REDIS", logoURL)
+
+            }else {
+                const expirySeconds = 60 * 60;
+                const presignedUrl = await minioClient.presignedGetObject('changemakers', logoPath, expirySeconds);
+
+                await redis.set(logoPath, JSON.stringify(presignedUrl), "EX", expirySeconds);
+
+                logoURL = presignedUrl;
+
+
+
+
+            }
+
 
         } catch (minioError) {
             console.error("MinIO presigned URL error:", minioError);
