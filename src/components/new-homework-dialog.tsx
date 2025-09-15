@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import {useState} from "react";
+import {Button} from "@/components/ui/button";
+import {ChevronDownIcon, Plus, BadgeInfoIcon, InfoIcon} from "lucide-react";
+import {Calendar} from "@/components/ui/calendar";
+import {Popover, PopoverContent, PopoverTrigger,} from "@/components/ui/popover"
+import {Tooltip, TooltipContent, TooltipTrigger,} from "@/components/ui/tooltip"
 import {
   Dialog,
   DialogClose,
@@ -13,62 +16,133 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {useEffect} from "react";
-import {toast} from "sonner";
+
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select"
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
 import {LoadingButton} from "@/components/ui/loading-button";
-export function NewHomeworkDialog({class_id}: {class_id: string}) {
+
+export function NewHomeworkDialog({ classes }: { classes: any[] }) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [openDate, setOpenDate] = useState(false)
+  const [date, setDate] = useState<Date | undefined>(undefined)
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    setIsLoading(true);
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const email = String(formData.get("email") ?? "");
-    const result = await fetch("/api/newmember", { method: "POST", body: JSON.stringify({ new_member_email: email,  class_id:class_id }) });
-    if (!result?.ok) {
-      setIsLoading(false);
-      toast.error("There was an error adding the new member.");
-      return;
-    }
-    setIsLoading(false);
-    toast.success("New member added.")
-    window.location.reload();
-
-
-    setOpen(false);
-  }
+  // async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  //   setIsLoading(true);
+  //   e.preventDefault();
+  //   const formData = new FormData(e.currentTarget);
+  //   const title = String(formData.get("title") ?? "");
+  //   const result = await fetch("/api/newmember", { method: "POST", body: JSON.stringify({ new_member_email: email,  class_id:class_id }) });
+  //   if (!result?.ok) {
+  //     setIsLoading(false);
+  //     toast.error("There was an error adding the new member.");
+  //     return;
+  //   }
+  //   setIsLoading(false);
+  //   toast.success("New member added.")
+  //   window.location.reload();
+  //
+  //
+  //   setOpen(false);
+  // }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button type="button" variant="outline">
-          <Plus /> New Member
-        </Button>
-      </DialogTrigger>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button type="button" variant="outline">
+            <Plus /> New Homework
+          </Button>
+        </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>New Homework</DialogTitle>
-          <DialogDescription>Add a new homework here</DialogDescription>
-        </DialogHeader>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>New Homework</DialogTitle>
+            <DialogDescription>Add a new homework here</DialogDescription>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="grid gap-4">
-          <div className="grid gap-3">
-            <Label htmlFor="name-1">Member's Emil</Label>
-            <Input id="name-1" name="email" defaultValue="" />
-          </div>
+          <form  className="grid gap-4">
+            <div className="grid gap-3">
+              <Label htmlFor="title-1">Title</Label>
+              <Input id="title-1" name="title" defaultValue="" />
+              <div className="flex gap-4 ">
+                <div className="flex flex-col gap-3  w-full">
+                  <Label htmlFor="date-picker" className="px-1">
+                    Date
+                  </Label>
+                  <Popover open={openDate} onOpenChange={setOpenDate} >
+                    <PopoverTrigger asChild>
+                      <Button
+                          variant="outline"
+                          id="date-picker"
+                          className=" justify-between font-normal "
+                      >
+                        {date ? date.toLocaleDateString() : "Select date"}
+                        <ChevronDownIcon />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                      <Calendar
+                          mode="single"
+                          selected={date}
+                          captionLayout="dropdown"
+                          onSelect={(date) => {
+                            setDate(date)
+                            setOpenDate(false)
+                          }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="flex flex-col gap-3 w-full">
+                  <Label htmlFor="time-picker" className="px-1">
+                    Time
+                  </Label>
+                  <Input
+                      type="time"
+                      id="time-picker"
+                      step="1"
+                      defaultValue="10:30:00"
+                      className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                  />
+                </div>
 
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="outline">Cancel</Button>
-            </DialogClose>
-            <LoadingButton type="submit" loading={isLoading}>Add</LoadingButton>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+              </div>
+              <div className="flex flex-row gap-2">
+                <Label htmlFor="select-1">Homework Connection</Label>
+                <Tooltip>
+                  <TooltipTrigger><InfoIcon size={16} /></TooltipTrigger>                <TooltipContent>
+                  <p>When a class is selected, the homework will be added to everyone's homework list</p>
+                </TooltipContent>
+                </Tooltip>
+
+              </div>
+
+              <Select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Classes" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="no_class">Personal Homework</SelectItem>
+
+                  {classes.map((cls) => (
+                      <SelectItem key={cls.id} value={cls.id}>{cls.class_name}</SelectItem>
+                  ))}
+
+                </SelectContent>
+              </Select>
+
+
+            </div>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline">Cancel</Button>
+              </DialogClose>
+              <LoadingButton type="submit" loading={isLoading}>Add</LoadingButton>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
   );
 }
