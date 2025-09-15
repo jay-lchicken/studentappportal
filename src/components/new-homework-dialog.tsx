@@ -49,8 +49,24 @@ export function NewHomeworkDialog({ classes }: { classes: any[] }) {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     setIsLoading(true);
     e.preventDefault();
+    if (!date){
+        toast.error("Please select a date");
+        setIsLoading(false);
+        return;
+    }
+    if (!time){
+        toast.error("Please select a time");
+        setIsLoading(false);
+        return;
+    }
+
     const formData = new FormData(e.currentTarget);
     const title = String(formData.get("title") ?? "");
+    if (!title){
+        toast.error("Please enter a title");
+        setIsLoading(false);
+        return;
+    }
     const due_date = getDateTime(date, time);
     const class_id = String(formData.get("class_id") ?? "no_class");
 
