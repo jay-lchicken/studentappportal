@@ -57,7 +57,7 @@ export function NewMemberDialog({class_id}: {class_id: string}) {
 
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-3">
-            <Label htmlFor="name-1">Member's Emil</Label>
+            <Label htmlFor="name-1">Member's Email</Label>
             <Input id="name-1" name="email" defaultValue="" />
           </div>
 
