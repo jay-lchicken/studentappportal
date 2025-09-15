@@ -25,9 +25,11 @@ export default async function ClassesGrid({hash}: { hash: string }) {
                     console.log("REDIS", row.logoURL)
 
                 } else {
-                    const expirySeconds = 60 * 60;
+                    console.log("new redis ")
+
+                    const expirySeconds = 60*60;
                     const presignedUrl = await minioClient.presignedGetObject('changemakers', row.logo_path, expirySeconds);
-                    await redis.set(presignedUrl, JSON.stringify(presignedUrl), "EX", expirySeconds);
+                    await redis.set(row.logo_path, JSON.stringify(presignedUrl), "EX", expirySeconds);
                     row.logoURL = presignedUrl;
                 }
             }catch (error) {
@@ -39,7 +41,7 @@ export default async function ClassesGrid({hash}: { hash: string }) {
 
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 p-4">
             {rows.map((row: any) => (
                 <Card className="flex-1" key={row.class_id}>
                     <div  className="flex flex-row items-center justify-between">

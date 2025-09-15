@@ -106,7 +106,7 @@ export default async function Page({
                 console.log("REDIS", logoURL)
 
             }else {
-                const expirySeconds = 60 * 60;
+                const expirySeconds = 60*60;
                 const presignedUrl = await minioClient.presignedGetObject('changemakers', logoPath, expirySeconds);
 
                 await redis.set(logoPath, JSON.stringify(presignedUrl), "EX", expirySeconds);
