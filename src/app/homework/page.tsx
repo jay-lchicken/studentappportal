@@ -10,6 +10,9 @@ import {NewHomeworkDialog} from "@/components/new-homework-dialog";
 import { HomeworkToggle } from "@/components/homework-toggle";
 import pool from "@/lib/db";
 import crypto from "node:crypto";
+import {Button} from "@/components/ui/button";
+import { TrashIcon} from "lucide-react";
+import {DeleteHomeworkButton} from "@/components/delete-homework";
 
 interface Homework {
     id: number;
@@ -18,6 +21,7 @@ interface Homework {
     completed: boolean;
     creator_name: string;
     class_name?: string;
+    class_id_link: string;
 }
 
 export default async function Page() {
@@ -34,6 +38,8 @@ export default async function Page() {
          WHERE class_user.hash_userid = $1`,
         [hash_email_userid]
     );
+
+
 
     const { rows: homeworkRows } = await pool.query(
         `SELECT
@@ -88,7 +94,7 @@ export default async function Page() {
                                                             </Badge>
                                                         )}
                                                         {!homework.class_name && (
-                                                            <Badge variant="outline">Personal</Badge>
+                                                            <Badge variant="outline">{homework.class_id_link ? "404 Class Not Found" : "Personal"}</Badge>
                                                         )}
                                                     </div>
                                                     <p className="text-sm text-muted-foreground mb-2">
@@ -110,10 +116,16 @@ export default async function Page() {
                                                         </p>
                                                     )}
                                                 </div>
-                                                <HomeworkToggle
-                                                    homeworkId={homework.id}
-                                                    completed={homework.completed}
-                                                />
+                                                <div className={"flex flex-col gap-2 items-end"}>
+                                                    <HomeworkToggle
+                                                        homeworkId={homework.id}
+                                                        completed={homework.completed}
+                                                    />
+                                                    <DeleteHomeworkButton homeworkId={homework.id}></DeleteHomeworkButton>
+
+
+                                                </div>
+
                                             </div>
                                         </CardContent>
                                     </Card>
@@ -149,11 +161,11 @@ export default async function Page() {
                                                             <Badge
                                                                 variant="outline"
                                                             >
-                                                                {homework.class_name}
+                                                                {(homework.class_name || "{404 Class Not Found)")}
                                                             </Badge>
                                                         )}
                                                         {!homework.class_name && (
-                                                            <Badge variant="outline">Personal</Badge>
+                                                            <Badge variant="outline">{homework.class_id_link ? "404 Class Not Found" : "Personal"}</Badge>
                                                         )}
                                                     </div>
                                                     <p className="text-sm text-muted-foreground mb-2">

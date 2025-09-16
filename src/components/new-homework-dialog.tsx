@@ -166,7 +166,7 @@ export function NewHomeworkDialog({ classes }: { classes: any[] }) {
 
             </div>
 
-            <DialogFooter>
+            <DialogFooter className={"gap-y-2"}>
               <DialogClose asChild>
                 <Button type="button" variant="outline">Cancel</Button>
               </DialogClose>
