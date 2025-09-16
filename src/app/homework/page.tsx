@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator"
 
 import {auth0} from "@/lib/auth0";
 import {notFound} from "next/navigation";
-import {NewHomeworkDialog} from "@/components/new-homework-dialog";
+import {NewExamDialog} from "@/components/new-exam-dialog";
 import { HomeworkToggle } from "@/components/homework-toggle";
 import pool from "@/lib/db";
 import crypto from "node:crypto";
@@ -61,7 +61,7 @@ export default async function Page() {
             <SidebarInset>
                 <div className="justify-between flex flex-row p-4 pb-0">
                     <h1 className="text-2xl font-medium ml-1">Homework</h1>
-                    <NewHomeworkDialog classes={classesRows}/>
+                    <NewExamDialog classes={classesRows}/>
                 </div>
 
                 <div className="p-4 space-y-6">
