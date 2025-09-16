@@ -7,7 +7,6 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 import {auth0} from "@/lib/auth0";
 import {notFound} from "next/navigation";
-import {NewExamDialog} from "@/components/new-exam-dialog";
 import {NewSubjectDialog} from "@/components/new-subject-dialog";
 
 export default async function Page() {
