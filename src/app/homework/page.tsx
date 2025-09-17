@@ -13,6 +13,7 @@ import crypto from "node:crypto";
 import {Button} from "@/components/ui/button";
 import { TrashIcon} from "lucide-react";
 import {DeleteHomeworkButton} from "@/components/delete-homework";
+import {NewHomeworkDialog} from "@/components/new-homework-dialog";
 
 interface Homework {
     id: number;
@@ -61,7 +62,7 @@ export default async function Page() {
             <SidebarInset>
                 <div className="justify-between flex flex-row p-4 pb-0">
                     <h1 className="text-2xl font-medium ml-1">Homework</h1>
-                    <NewExamDialog classes={classesRows}/>
+                    <NewHomeworkDialog classes={classesRows}/>
                 </div>
 
                 <div className="p-4 space-y-6">

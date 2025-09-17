@@ -61,7 +61,7 @@ export function NewMemberDialog({class_id}: {class_id: string}) {
             <Input id="name-1" name="email" defaultValue="" />
           </div>
 
-          <DialogFooter>
+          <DialogFooter className={"gap-y-2"}>
             <DialogClose asChild>
               <Button type="button" variant="outline">Cancel</Button>
             </DialogClose>

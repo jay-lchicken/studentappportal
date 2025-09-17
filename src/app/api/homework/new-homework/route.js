@@ -8,7 +8,7 @@ export async function POST(req) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { title, class_id, date } = await req.json();
+  const { title, class_id, date, filePaths, links } = await req.json();
 
   const email = session.user.email;
   const userId = session.user.sub;
@@ -32,10 +32,10 @@ export async function POST(req) {
     }
     if (class_id == "no_class"){
       const new_homework = await pool.query(
-          `INSERT INTO homework (title, due_date, creator_hashid, creator_name, personal_hashid)
-           VALUES ($1, $2, $3, $4, $5)
+          `INSERT INTO homework (title, due_date, creator_hashid, creator_name, personal_hashid, links, file_paths)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)
              RETURNING *;`,
-          [title, date,  hash, name, hash]
+          [title, date,  hash, name, hash, links, filePaths]
       );
       return NextResponse.json(new_homework.rows);
 
@@ -52,10 +52,10 @@ export async function POST(req) {
       );
       for (const member of all_members.rows) {
         const new_homework = await pool.query(
-            `INSERT INTO homework (title, due_date, creator_hashid, creator_name, class_id_link, personal_hashid)
-             VALUES ($1, $2, $3, $4, $5, $6)
+            `INSERT INTO homework (title, due_date, creator_hashid, creator_name, class_id_link, personal_hashid, links, file_paths)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
                RETURNING *;`,
-            [title, date, hash, name, class_id, member.hash_userid] );
+            [title, date, hash, name, class_id, member.hash_userid, links, filePaths] );
       }
       return NextResponse.json({ verifyInClass });
     }

@@ -61,7 +61,7 @@ export function NewClassDialog() {
             <Input id="name-1" name="name" defaultValue="" />
           </div>
 
-          <DialogFooter>
+          <DialogFooter  className={"gap-y-2"}>
             <DialogClose asChild>
               <Button type="button" variant="outline">Cancel</Button>
             </DialogClose>
