@@ -132,7 +132,8 @@ export default async function Page() {
                                                         completed={homework.completed}
                                                     />
                                                     <div className={"flex flex-row gap-2"}>
-                                                        <MoreInfoButton homework={{ id: String(homework.id) }}></MoreInfoButton>                                                        <DeleteHomeworkButton homeworkId={homework.id}></DeleteHomeworkButton>
+                                                        <MoreInfoButton homework={{ id: String(homework.id) }}></MoreInfoButton>
+                                                        <DeleteHomeworkButton homeworkId={homework.id}></DeleteHomeworkButton>
 
                                                     </div>
 

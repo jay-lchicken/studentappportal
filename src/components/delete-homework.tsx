@@ -30,6 +30,9 @@ export function DeleteHomeworkButton({ homeworkId }: HomeworkToggleProps) {
             });
             if (response.ok){
                 toast.success("Homework deleted successfully");
+                if (window.location.pathname == '/homework/'+homeworkId){
+                    window.location.href = '/homework';
+                }
             }
 
 

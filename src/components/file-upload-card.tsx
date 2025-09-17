@@ -43,9 +43,12 @@ export function FileUploadCard({
                             <p className="text-sm font-medium truncate whitespace-nowrap overflow-hidden text-ellipsis ">  {file.name.length > 40 ? file.name.slice(0, 37) + '...' : file.name}
                             </p>
                             <div className="flex items-center gap-2">
+                                {status === 'error' && (
+                                    <AlertCircle className="h-4 w-4 text-red-500" />
+                                )}
 
 
-                                {status === 'success' && onRemove && (
+                                {status === 'success' || status ==='error' && onRemove && (
                                     <Button
                                         variant="ghost"
                                         size="sm"
@@ -55,15 +58,14 @@ export function FileUploadCard({
                                         <X className="h-3 w-3" />
                                     </Button>
                                 )}
-                                {status === 'error' && (
-                                    <AlertCircle className="h-4 w-4 text-red-500" />
-                                )}
+
                                 {status === 'uploading' && onCancel && (
                                     <Button
                                         variant="ghost"
                                         size="sm"
                                         className="h-6 w-6 p-0"
                                         onClick={onCancel}
+                                        type={"button"}
                                     >
                                         <X className="h-3 w-3" />
                                     </Button>
@@ -90,9 +92,11 @@ export function FileUploadCard({
                                         size="sm"
                                         className="h-6 text-xs"
                                         onClick={onRetry}
+                                        type={"button"}
                                     >
                                         Retry
                                     </Button>
+
                                 )}
                             </div>
                         )}

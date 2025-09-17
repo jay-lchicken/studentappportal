@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { CalendarIcon, CheckCircleIcon, XCircleIcon, BookOpenIcon, UserIcon, ClockIcon } from "lucide-react"
-
 import { auth0 } from "@/lib/auth0"
 import { notFound } from "next/navigation"
 import { HomeworkToggle } from "@/components/homework-toggle"
@@ -15,6 +14,8 @@ import pool from "@/lib/db"
 import crypto from "node:crypto"
 import Link from "next/link"
 import {DateTime} from "luxon"
+import redis from "@/lib/redis";
+import {minioClient} from "@/lib/upload";
 
 interface Homework {
     id: number;
@@ -26,9 +27,12 @@ interface Homework {
     class_name?: string;
     class_id_link: string;
     date_created: Date;
-    subject?: string;
+    file_paths?: string[];
 }
-
+interface Files{
+    name: string;
+    url: string;
+}
 export default async function HomeworkDetailPage({
                                                      params,
                                                  }: {
@@ -36,6 +40,7 @@ export default async function HomeworkDetailPage({
 }) {
     const session = await auth0.getSession();
     const user = session?.user;
+    const fileArrayPath : Files[] = [];
     const hash_email_userid = crypto.createHash('sha256').update(`${user?.email ?? ''}${user?.sub ?? ''}`).digest('hex');
 
     if (!session) {
@@ -54,10 +59,42 @@ export default async function HomeworkDetailPage({
     ) as { rows: Homework[] };
 
     if (homeworkRows.length === 0) {
-        notFound()
+       notFound()
+
     }
 
     const homework = homeworkRows[0];
+    if (homework.file_paths){
+        for (const filePath of homework.file_paths){
+            let url = await redis.get(filePath);
+            if (url) {
+                console.log('Found', url);
+                fileArrayPath.push(JSON.parse(url));
+                console.log('Found', fileArrayPath);
+            } else {
+                console.log("new redis ")
+               try{
+                     const objectStat = await minioClient.statObject('changemakers', filePath);
+                const originalFileName = objectStat.metaData?.['original-name'] || objectStat.metaData?.originalName || 'download';
+                const expirySeconds = 60*60*24;
+                const presignedUrl = await minioClient.presignedGetObject(
+                    'changemakers',
+                    filePath,
+                    expirySeconds,
+                    {
+                        'response-content-disposition': `attachment; filename="${decodeURIComponent(originalFileName)}"`
+                    }
+                );
+                await redis.set(filePath, JSON.stringify({ name: originalFileName, url: presignedUrl }), "EX", expirySeconds);
+                fileArrayPath.push({ name: originalFileName, url: presignedUrl });
+               } catch (error){
+                     console.error('Error fetching file from MinIO:', error);
+               }
+            }
+        }
+    }
+
+
 
 
 
@@ -237,6 +274,38 @@ export default async function HomeworkDetailPage({
                                 </CardHeader>
                                 <CardContent>
                                     <p className="whitespace-pre-wrap">{homework.description}</p>
+                                </CardContent>
+                            </Card>
+                        )}
+                        {fileArrayPath.length > 0 && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg">Attachments</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-2">
+                                        {fileArrayPath.map((file, index) => (
+                                            <div key={index} className="flex items-center justify-between">
+                                                <a
+                                                    href={file.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-600 hover:underline"
+                                                >
+                                                    {file.name.length > 40 ? file.name.slice(0, 37) + '...' : file.name}
+                                                </a>
+                                                <a
+                                                    href={file.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    <Button variant="outline" size="sm">
+                                                        Download
+                                                    </Button>
+                                                </a>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </CardContent>
                             </Card>
                         )}
