@@ -36,8 +36,9 @@ export async function POST(request) {
 
     await minioClient.putObject('changemakers', filePath, buffer, buffer.length, {
       'Content-Type': file.type,
-      'Original-Name': file.name,
+      'Original-Name': encodeURIComponent(file.name),
     });
+
 
     return NextResponse.json({
       success: true,

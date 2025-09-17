@@ -14,6 +14,8 @@ import {Button} from "@/components/ui/button";
 import { TrashIcon} from "lucide-react";
 import {DeleteHomeworkButton} from "@/components/delete-homework";
 import {NewHomeworkDialog} from "@/components/new-homework-dialog";
+import {SiteHeader} from "@/components/site-header";
+import MoreInfoButton from "@/components/MoreInfoButton";
 
 interface Homework {
     id: number;
@@ -26,6 +28,7 @@ interface Homework {
 }
 
 export default async function Page() {
+
     const session = await auth0.getSession();
     const user = session?.user;
     const hash_email_userid = crypto.createHash('sha256').update(`${user?.email ?? ''}${user?.sub ?? ''}`).digest('hex');
@@ -39,6 +42,8 @@ export default async function Page() {
          WHERE class_user.hash_userid = $1`,
         [hash_email_userid]
     );
+
+
 
 
 
@@ -59,7 +64,10 @@ export default async function Page() {
     return (
         <SidebarProvider>
             <AppSidebar variant="inset" name={user?.name ?? ""} email={user?.email ?? ""}/>
+
             <SidebarInset>
+                <SiteHeader title="Homework" />
+
                 <div className="justify-between flex flex-row p-4 pb-0">
                     <h1 className="text-2xl font-medium ml-1">Homework</h1>
                     <NewHomeworkDialog classes={classesRows}/>
@@ -117,13 +125,16 @@ export default async function Page() {
                                                         </p>
                                                     )}
                                                 </div>
+
                                                 <div className={"flex flex-col gap-2 items-end"}>
                                                     <HomeworkToggle
                                                         homeworkId={homework.id}
                                                         completed={homework.completed}
                                                     />
-                                                    <DeleteHomeworkButton homeworkId={homework.id}></DeleteHomeworkButton>
+                                                    <div className={"flex flex-row gap-2"}>
+                                                        <MoreInfoButton homework={{ id: String(homework.id) }}></MoreInfoButton>                                                        <DeleteHomeworkButton homeworkId={homework.id}></DeleteHomeworkButton>
 
+                                                    </div>
 
                                                 </div>
 

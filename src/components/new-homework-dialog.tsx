@@ -258,7 +258,7 @@ export function NewHomeworkDialog({ classes }: { classes: any[] }) {
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>New Homework</DialogTitle>
             <DialogDescription>Add a new homework here</DialogDescription>
