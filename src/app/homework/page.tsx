@@ -16,7 +16,7 @@ import {DeleteHomeworkButton} from "@/components/delete-homework";
 import {NewHomeworkDialog} from "@/components/new-homework-dialog";
 import {SiteHeader} from "@/components/site-header";
 import MoreInfoButton from "@/components/MoreInfoButton";
-
+import {DueDate} from "@/components/Local-date-formatting";
 interface Homework {
     id: number;
     title: string;
@@ -107,17 +107,8 @@ export default async function Page() {
                                                         )}
                                                     </div>
                                                     <p className="text-sm text-muted-foreground mb-2">
-                                                        Due: {homework.due_date
-                                                        ? new Date(homework.due_date).toLocaleDateString('en-US', {
-                                                            weekday: 'short',
-                                                            year: 'numeric',
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                        })
-                                                        : ''}
-                                                    </p>
+  Due: <DueDate dateString={homework.due_date} />
+</p>
 
                                                     {homework.creator_name !== user?.name && (
                                                         <p className="text-xs text-muted-foreground">
