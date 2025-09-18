@@ -31,6 +31,7 @@ interface FileUploadState {
   status: 'uploading' | 'success' | 'error';
   error?: string;
   filePath?: string;
+  originalName?: string;
 }
 
 export function NewHomeworkDialog({ classes }: { classes: any[] }) {
@@ -52,7 +53,7 @@ export function NewHomeworkDialog({ classes }: { classes: any[] }) {
     return newDate;
   }
 
-  const uploadFileWithProgress = async (file: File): Promise<string | null> => {
+  const uploadFileWithProgress = async (file: File): Promise<{ file_path: string; original_name: string } | null> => {
     const fileId = `${file.name}-${Date.now()}`;
     const controller = new AbortController();
     abortControllers.current.set(fileId, controller);
@@ -65,7 +66,7 @@ export function NewHomeworkDialog({ classes }: { classes: any[] }) {
 
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('files', file);
 
       const xhr = new XMLHttpRequest();
 
@@ -82,15 +83,17 @@ export function NewHomeworkDialog({ classes }: { classes: any[] }) {
         xhr.addEventListener('load', () => {
           if (xhr.status === 200) {
             const response = JSON.parse(xhr.responseText);
+            const fileData = response.files[0];
             setUploadStates(prev => prev.map(state =>
                 state.file === file ? {
                   ...state,
                   progress: 100,
                   status: 'success',
-                  filePath: response.filePath
+                  filePath: fileData.file_path,
+                  originalName: fileData.original_name
                 } : state
             ));
-            resolve(response.filePath);
+            resolve(fileData);
           } else {
             const errorText = xhr.responseText || 'Upload failed';
             setUploadStates(prev => prev.map(state =>
@@ -233,7 +236,12 @@ export function NewHomeworkDialog({ classes }: { classes: any[] }) {
     }
     const due_date = getDateTime(date, time);
     const class_id = String(formData.get("class_id") ?? "no_class");
-    const filePaths = uploadStates.map(upload => upload.filePath).filter((path): path is string => !!path);
+    const filePaths = uploadStates
+        .filter(upload => upload.status === 'success' && upload.filePath && upload.originalName)
+        .map(upload => ({
+          file_path: upload.filePath!,
+          original_name: upload.originalName!
+        }));
 
 
     const result = await fetch("/api/homework/new-homework", { method: "POST", body: JSON.stringify({ title: title,  date:due_date , class_id:class_id, filePaths: filePaths, links: links}), headers: { "Content-Type": "application/json" } });
