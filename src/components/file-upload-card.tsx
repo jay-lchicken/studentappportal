@@ -48,7 +48,7 @@ export function FileUploadCard({
                                 )}
 
 
-                                {status === 'success' || status ==='error' && onRemove && (
+                                {(status === 'success' || status === 'error') && onRemove && (
                                     <Button
                                         variant="ghost"
                                         size="sm"
@@ -59,12 +59,12 @@ export function FileUploadCard({
                                     </Button>
                                 )}
 
-                                {status === 'uploading' && onCancel && (
+                                {status === 'uploading' && onRemove && (
                                     <Button
                                         variant="ghost"
                                         size="sm"
                                         className="h-6 w-6 p-0"
-                                        onClick={onCancel}
+                                        onClick={onRemove}
                                         type={"button"}
                                     >
                                         <X className="h-3 w-3" />
