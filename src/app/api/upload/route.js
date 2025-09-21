@@ -32,14 +32,14 @@ export async function POST(request) {
         const fileExtension = file.name.split('.').pop();
         const fileName = `${timestamp}_${crypto.randomUUID().substring(0, 8)}.${fileExtension}`;
         const filePath = `files/${hash}/${fileName}`;
-
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        await minioClient.putObject('changemakers', filePath, buffer, buffer.length, {
+        const nodeStream = require('stream');
+        const fileStream = nodeStream.Readable.fromWeb(file.stream());
+        await minioClient.putObject('changemakers', filePath, fileStream, file.size, {
           'Content-Type': file.type,
           'Original-Name': encodeURIComponent(file.name),
         });
+
+
 
         uploadedFiles.push({
           file_path: filePath,
@@ -55,6 +55,7 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('Upload error:', error);
+    console.error(error.cause);
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
   }
 }

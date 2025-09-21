@@ -87,7 +87,10 @@ export default function ClassSettingsGallery({cls, logo_path}: {cls: {id: string
                         maxSize={1024 * 1024 * 10}
                         minSize={1024}
                         onDrop={handleDrop}
-                        onError={console.error}
+                        onError={() => {
+                            console.error;
+                            toast.error("File upload exceeded the maximum size of 10MB");
+                        }}
                         src={files}
                     >
                         <DropzoneEmptyState />

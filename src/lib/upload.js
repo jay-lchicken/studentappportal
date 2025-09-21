@@ -5,7 +5,9 @@ export const minioClient = new Minio.Client({
   useSSL: process.env.MINIO_USE_SSL === 'true',
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY,
-  region: "us-east-1"
+  region: "us-east-1",
+  forcePathStyle: true
+
 });
 minioClient.traceOn(process.stdout)
 

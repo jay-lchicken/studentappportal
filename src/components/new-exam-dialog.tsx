@@ -44,6 +44,8 @@ export function NewExamDialog({ subjects }: { subjects: any[] }) {
   const [openDate, setOpenDate] = useState(false)
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState<string>("10:30");
+  const [score, setScore] = useState<string>("");
+  const [outOf, setOutOf] = useState<string>("");
 
   function getDateTime(date: Date | undefined, time: string): Date | undefined {
     if (!date || !time) return undefined;
@@ -196,179 +198,260 @@ export function NewExamDialog({ subjects }: { subjects: any[] }) {
       return;
     }
 
+    if (score !== "" || outOf !== "") {
+      if (score === "" || outOf === "") {
+        toast.error("Please enter both score and out of values, or leave both empty");
+        setIsLoading(false);
+        return;
+      }
+
+      const scoreNum = parseInt(score);
+      const outOfNum = parseInt(outOf);
+
+      if (isNaN(scoreNum) || isNaN(outOfNum) || scoreNum < 0 || outOfNum < 1 || scoreNum > outOfNum) {
+        toast.error("Please enter valid score values (score must be between 0 and out of value)");
+        setIsLoading(false);
+        return;
+      }
+    }
+
     for (const upload of uploadStates) {
       if (upload.status === 'uploading') {
-        toast.error(`Please wait for all files to finish uploading and become green.`);
-        setIsLoading(false);
-        return;
-      }
-      if (upload.status === 'error') {
-        toast.error(`Please remove or retry all failed uploads.`);
+        toast.error("Please wait for all files to finish uploading");
         setIsLoading(false);
         return;
       }
     }
 
-    const formData = new FormData(e.currentTarget);
-    const title = String(formData.get("title") ?? "");
-    if (!title) {
-      toast.error("Please enter a title");
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+
+    const examData = {
+      title: formData.get('title'),
+      subject_id: formData.get('subject'),
+      date_of_exam: getDateTime(date, time)?.toISOString(),
+      score: score !== "" ? parseInt(score) : null,
+      out_of: outOf !== "" ? parseInt(outOf) : null,
+      uploaded_files: uploadStates
+          .filter(state => state.status === 'success')
+          .map(state => ({
+            file_path: state.filePath,
+            original_name: state.originalName
+          }))
+    };
+
+    try {
+      const response = await fetch('/api/exams/new-exam', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(examData),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+
+      toast.success("Exam added successfully!");
+      setOpen(false);
+      form.reset();
+      setDate(undefined);
+      setTime("10:30");
+      setScore("");
+      setOutOf("");
+      setFiles(undefined);
+      setUploadStates([]);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error creating exam:', error);
+      toast.error(`Failed to add exam: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    const subject_id = String(formData.get("subject_id") ?? "");
-    if (!subject_id || subject_id === "no_subject") {
-      toast.error("Please select a subject");
-      setIsLoading(false);
-      return;
-    }
-
-    const dateTime = getDateTime(date, time);
-    const filePaths = uploadStates
-        .filter(upload => upload.status === 'success' && upload.filePath && upload.originalName)
-        .map(upload => ({
-          file_path: upload.filePath!,
-          original_name: upload.originalName!
-        }));
-
-    const result = await fetch("/api/exams/new-exam", {
-      method: "POST",
-      body: JSON.stringify({
-        title: title,
-        subject_id: subject_id,
-        date_of_exam: dateTime?.toISOString(),
-        filePaths: filePaths
-      }),
-      headers: { "Content-Type": "application/json" }
-    });
-
-    if (!result?.ok) {
-      setIsLoading(false);
-      toast.error("There was an error adding the new exam.");
-      return;
-    }
-
-    setIsLoading(false);
-    toast.success("New exam added.");
-    window.location.reload();
-    setOpen(false);
   }
 
+  const today = new Date();
+  const disabledDays = {
+    from: new Date(today.getTime() + 24 * 60 * 60 * 1000),
+    to: new Date(2030, 11, 31)
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button type="button" variant="outline">
-          <Plus /> New Exam
-        </Button>
-      </DialogTrigger>
+      <Dialog open={open} onOpenChange={setOpen} >
+        <DialogTrigger asChild>
+          <Button className="h-8 gap-1">
+            <Plus className="h-3.5 w-3.5" />
+            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+            Add Exam
+          </span>
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Exam</DialogTitle>
+            <DialogDescription>
+              Record details of a past exam. Only today and previous dates are allowed.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="title">Exam Title</Label>
+              <Input
+                  id="title"
+                  name="title"
+                  placeholder="Enter exam title"
+                  required
+              />
+            </div>
 
-      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto overflow-x-hidden">
-        <DialogHeader>
-          <DialogTitle>New Exam</DialogTitle>
-          <DialogDescription>Add a new exam record here</DialogDescription>
-        </DialogHeader>
+            <div className="grid gap-2">
+              <Label htmlFor="subject">Subject</Label>
+              <Select name="subject" required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a subject" />
+                </SelectTrigger>
+                <SelectContent>
+                  {subjects.map((subject) => (
+                      <SelectItem key={subject.id} value={subject.id.toString()}>
+                        {subject.subject_name}
+                      </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-        <form onSubmit={handleSubmit} className="grid gap-4">
-          <div className="grid gap-3">
-            <Label htmlFor="title-1">Title</Label>
-            <Input id="title-1" name="title" defaultValue="" placeholder="e.g., Midterm Exam, Final Test" />
-
-            <div className="flex gap-4">
-              <div className="flex flex-col gap-3 w-full">
-                <Label htmlFor="date-picker" className="px-1">Date</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label>Date</Label>
                 <Popover open={openDate} onOpenChange={setOpenDate}>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" id="date-picker" className="justify-between font-normal">
-                      {date ? date.toLocaleDateString() : "Select date"}
-                      <ChevronDownIcon />
+                    <Button
+                        variant="outline"
+                        className="justify-start text-left font-normal"
+                    >
+                      {date ? date.toLocaleDateString() : "Pick a date"}
+                      <ChevronDownIcon className="ml-auto h-4 w-4" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                  <PopoverContent className="w-auto p-0">
                     <Calendar
                         mode="single"
                         selected={date}
-                        captionLayout="dropdown"
                         onSelect={handleDateChange}
+                        disabled={disabledDays}
+                        initialFocus
                     />
                   </PopoverContent>
                 </Popover>
               </div>
 
-              <div className="flex flex-col gap-3 w-full">
-                <Label htmlFor="time-picker" className="px-1">Time</Label>
+              <div className="grid gap-2">
+                <Label htmlFor="time">Time</Label>
                 <Input
+                    id="time"
                     type="time"
-                    id="time-picker"
-                    step="1"
                     value={time}
                     onChange={handleTimeChange}
-                    className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                    required
                 />
               </div>
             </div>
 
-            <div className="flex flex-row gap-2">
-              <Label htmlFor="select-1">Subject</Label>
-              <Tooltip>
-                <TooltipTrigger><InfoIcon size={16} /></TooltipTrigger>
-                <TooltipContent>
-                  <p>Select the subject for this exam</p>
-                </TooltipContent>
-              </Tooltip>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="score">Score (optional)</Label>
+                <Input
+                    id="score"
+                    type="number"
+                    min="0"
+                    placeholder="Enter score"
+                    value={score}
+                    onChange={(e) => setScore(e.target.value)}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="outOf">Out of (optional)</Label>
+                <Input
+                    id="outOf"
+                    type="number"
+                    min="1"
+                    placeholder="Total marks"
+                    value={outOf}
+                    onChange={(e) => setOutOf(e.target.value)}
+                />
+              </div>
             </div>
 
-            <Select name={"subject_id"} defaultValue="">
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Subject" />
-              </SelectTrigger>
-              <SelectContent>
-                {subjects.map((subject) => (
-                    <SelectItem key={subject.id} value={subject.id.toString()}>{subject.subject_name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            {(score !== "" || outOf !== "") && (
+                <div className="text-sm text-muted-foreground bg-blue-50 p-3 rounded-md">
+                  <div className="flex items-center gap-2">
+                    <InfoIcon className="h-4 w-4" />
+                    <span>
+                  {score !== "" && outOf !== ""
+                      ? `Percentage: ${Math.round((parseInt(score) / parseInt(outOf)) * 100)}%`
+                      : "Please fill both score fields or leave both empty"
+                  }
+                </span>
+                  </div>
+                </div>
+            )}
 
-          <Dropzone
-              accept={{ '': [] }}
-              maxFiles={10}
-              maxSize={1024 * 1024 * 500}
-              minSize={1}
-              onDrop={handleDrop}
-              onError={console.error}
-              src={files}
-          >
-            <DropzoneEmptyState />
-            <DropzoneContent />
-          </Dropzone>
+            <div className="grid gap-2">
+              <Label>Upload Files (optional)</Label>
 
-          {uploadStates.length > 0 && (
-              <div className="space-y-2">
-                <Label>File Uploads</Label>
-                {uploadStates.map((uploadState, index) => (
-                    <FileUploadCard
-                        key={`${uploadState.file.name}-${index}`}
-                        file={uploadState.file}
-                        progress={uploadState.progress}
-                        status={uploadState.status}
-                        error={uploadState.error}
-                        onCancel={() => handleCancelUpload(uploadState.file)}
-                        onRetry={() => handleRetryUpload(uploadState.file)}
-                        onRemove={() => handleRemoveFile(uploadState.file)}
-                    />
-                ))}
-              </div>
-          )}
+              <Dropzone
+                  onDrop={handleDrop}
+                  maxFiles={10}
+                  minSize={1}
 
-          <DialogFooter className={"gap-y-2"}>
-            <DialogClose asChild>
-              <Button type="button" variant="outline">Cancel</Button>
-            </DialogClose>
-            <LoadingButton type="submit" loading={isLoading}>Add</LoadingButton>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+                  maxSize={1024 * 1024 * 500}
+                  onError={() => {
+                    console.error;
+                    toast.error("File upload exceeded the maximum size of 500MB or maximum number of files (10).");
+                  }}
+                  src={files}
+                  accept={{ '': [] }}
+
+
+              >
+                <DropzoneEmptyState />
+                <DropzoneContent />
+
+              </Dropzone>
+
+              {uploadStates.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {uploadStates.map((upload, index) => (
+                        <FileUploadCard
+                            key={index}
+                            file={upload.file}
+                            progress={upload.progress}
+                            status={upload.status}
+                            error={upload.error}
+                            onCancel={() => handleCancelUpload(upload.file)}
+                            onRetry={() => handleRetryUpload(upload.file)}
+                            onRemove={() => handleRemoveFile(upload.file)}
+                        />
+                    ))}
+                  </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <LoadingButton type="submit" loading={isLoading}>
+                Add Exam
+              </LoadingButton>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
   );
 }

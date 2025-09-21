@@ -77,7 +77,14 @@ export default async function ExamDetailPage({
         } else {
             try {
                 const expirySeconds = 24 * 60 * 60;
-                const presignedUrl = await minioClient.presignedGetObject('changemakers', filePath.file_path, expirySeconds);
+                const presignedUrl = await minioClient.presignedGetObject(
+                        "changemakers",
+                        filePath.file_path,
+                        expirySeconds,
+                        {
+                            "response-content-disposition": `inline; filename="${decodeURIComponent(filePath.original_name)}"`
+                        }
+                    );
                 await redis.set(filePath.file_path, JSON.stringify(presignedUrl), "EX", expirySeconds);
                 fileArrayPath.push({
                     name: filePath.original_name,

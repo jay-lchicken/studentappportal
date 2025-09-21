@@ -21,6 +21,8 @@ interface Exam {
     subject_name: string;
     paper_file_paths: number;
     subject_id: string;
+    score?: number;
+    out_of?: number;
 }
 
 interface Subject {
@@ -44,19 +46,31 @@ export default async function Page() {
     ) as { rows: Subject[] };
 
     const { rows: examRows } = await pool.query(
-        `SELECT 
+        `SELECT
              er.*,
              se.subject_name
          FROM exam_records er
-         JOIN subjects_exam se ON er.subject_id::int = se.id
+                  JOIN subjects_exam se ON er.subject_id::int = se.id
          WHERE er.hash_userid_email = $1
          ORDER BY er.date_of_exam DESC`,
         [hash_userid_email]
     ) as { rows: Exam[] };
 
     const now = new Date();
-    const upcomingExams = examRows.filter((exam: Exam) => new Date(exam.date_of_exam) >= now);
-    const pastExams = examRows.filter((exam: Exam) => new Date(exam.date_of_exam) < now);
+    const pastExams = examRows.filter((exam: Exam) => new Date(exam.date_of_exam) <= now);
+
+    const examsWithScores = pastExams.filter(exam => exam.score !== null && exam.out_of !== null);
+
+
+    const chartData = examsWithScores
+        .sort((a, b) => new Date(a.date_of_exam).getTime() - new Date(b.date_of_exam).getTime())
+        .map((exam, index) => ({
+            exam: index + 1,
+            percentage: Math.round((exam.score! / exam.out_of!) * 100),
+            subject: exam.subject_name,
+            title: exam.title,
+            date: new Date(exam.date_of_exam).toLocaleDateString()
+        }));
 
     return (
         <SidebarProvider>
@@ -64,7 +78,7 @@ export default async function Page() {
             <SidebarInset>
                 <SiteHeader title={"Exams"} />
                 <div className="justify-between flex flex-row p-4 pb-0">
-                    <h1 className="text-2xl font-medium ml-1">Exams</h1>
+                    <h1 className="text-2xl font-medium ml-1">Past Exams</h1>
                     <div className="flex gap-2">
                         <NewSubjectDialog />
                         <NewExamDialog subjects={subjectsRows} />
@@ -72,65 +86,49 @@ export default async function Page() {
                 </div>
 
                 <div className="p-4 space-y-6">
-                    <div>
-                        <div className="flex items-center gap-2 mb-4">
-                            <h2 className="text-xl font-semibold">Upcoming Exams</h2>
-                            <Badge variant="default">{upcomingExams.length}</Badge>
-                        </div>
 
-                        {upcomingExams.length === 0 ? (
+
+
+
+                    {chartData.length > 0 && (
+                        <div>
+                            <h2 className="text-xl font-semibold mb-4">Score Growth Over Time</h2>
                             <Card>
-                                <CardContent className="p-6 text-center text-muted-foreground">
-                                    No upcoming exams scheduled.
+                                <CardContent className="p-6">
+                                    <div className="h-80">
+                                        <div className="w-full h-full flex items-end justify-between space-x-2">
+                                            {chartData.map((data, index) => (
+                                                <div key={index} className="flex flex-col items-center flex-1">
+                                                    <div className="text-xs text-muted-foreground mb-1">
+                                                        {data.percentage}%
+                                                    </div>
+                                                    <div
+                                                        className="w-full bg-blue-500 rounded-t hover:bg-blue-600 transition-colors cursor-pointer"
+                                                        style={{ height: `${(data.percentage / 100) * 200}px` }}
+                                                        title={`${data.title} - ${data.subject} (${data.date}): ${data.percentage}%`}
+                                                    />
+                                                    <div className="text-xs text-muted-foreground mt-1 text-center">
+                                                        Exam {data.exam}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 text-sm text-muted-foreground">
+                                        Hover over bars to see exam details
+                                    </div>
                                 </CardContent>
                             </Card>
-                        ) : (
-                            <div className="grid gap-4">
-                                {upcomingExams.map((exam: Exam) => (
-                                    <Card key={exam.id} className="border-l-4 border-l-blue-500">
-                                        <CardContent className="p-4">
-                                            <div className="flex items-start justify-between">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <h3 className="font-semibold">{exam.title}</h3>
-                                                        <Badge variant="outline">
-                                                            {exam.subject_name}
-                                                        </Badge>
-                                                    </div>
-                                                    <p className="text-sm text-muted-foreground mb-2">
-                                                        Date: {new Date(exam.date_of_exam).toLocaleDateString('en-US', {
-                                                            weekday: 'short',
-                                                            year: 'numeric',
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                        })}
-                                                    </p>
-                                                    {exam.paper_file_paths > 0 && (
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {exam.paper_file_paths} file(s) uploaded
-                                                        </p>
-                                                    )}
-                                                </div>
-                                                <div className={"flex flex-col gap-2 items-end"}>
-                                                    <MoreInfoButton exam={{ id: String(exam.id) }} type="exam" />
-                                                    <DeleteExam examId={String(exam.id)} examTitle={exam.title} />
-                                                </div>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
+
 
                     <Separator />
 
                     <div>
                         <div className="flex items-center gap-2 mb-4">
                             <h2 className="text-xl font-semibold">Past Exams</h2>
-                            <Badge variant="secondary">{pastExams.length}</Badge>
+                            <Badge variant="default">{pastExams.length}</Badge>
                         </div>
 
                         {pastExams.length === 0 ? (
@@ -141,36 +139,32 @@ export default async function Page() {
                             </Card>
                         ) : (
                             <div className="grid gap-4">
-                                {pastExams.map((exam: Exam) => (
-                                    <Card key={exam.id} className="border-l-4 border-l-gray-300 opacity-75">
-                                        <CardContent className="p-4">
+                                {pastExams.map((exam) => (
+                                    <Card key={exam.id}>
+                                        <CardContent className="p-6">
                                             <div className="flex items-start justify-between">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-2">
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-2">
                                                         <h3 className="font-semibold">{exam.title}</h3>
-                                                        <Badge variant="outline">
-                                                            {exam.subject_name}
-                                                        </Badge>
+                                                        <Badge variant="secondary">{exam.subject_name}</Badge>
+                                                        {exam.score !== null && exam.out_of !== null && exam.score !== undefined && exam.out_of !== undefined && (
+                                                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                                                {exam.score}/{exam.out_of} ({Math.round((exam.score / exam.out_of) * 100)}%)
+                                                            </Badge>
+                                                        )}
                                                     </div>
-                                                    <p className="text-sm text-muted-foreground mb-2">
-                                                        Date: {new Date(exam.date_of_exam).toLocaleDateString('en-US', {
-                                                            weekday: 'short',
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {new Date(exam.date_of_exam).toLocaleDateString('en-US', {
+                                                            weekday: 'long',
                                                             year: 'numeric',
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
+                                                            month: 'long',
+                                                            day: 'numeric'
                                                         })}
                                                     </p>
-                                                    {exam.paper_file_paths > 0 && (
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {exam.paper_file_paths} file(s) uploaded
-                                                        </p>
-                                                    )}
                                                 </div>
-                                                <div className={"flex flex-col gap-2 items-end"}>
-                                                    <MoreInfoButton exam={{ id: String(exam.id) }} type="exam" />
-                                                    <DeleteExam examId={String(exam.id)} examTitle={exam.title} />
+                                                <div className="flex gap-2">
+                                                    <MoreInfoButton exam={{id: exam.id.toString()}} type="exam" />
+                                                    <DeleteExam examId={exam.id.toString()} examTitle={exam.title} />
                                                 </div>
                                             </div>
                                         </CardContent>
@@ -179,19 +173,8 @@ export default async function Page() {
                             </div>
                         )}
                     </div>
-
-                    {subjectsRows.length === 0 && (
-                        <Card className="border-dashed">
-                            <CardContent className="p-6 text-center">
-                                <p className="text-muted-foreground mb-4">
-                                    You haven't created any subjects yet. Create a subject first to start adding exam records.
-                                </p>
-                                <NewSubjectDialog />
-                            </CardContent>
-                        </Card>
-                    )}
                 </div>
             </SidebarInset>
         </SidebarProvider>
-    )
+    );
 }

@@ -214,16 +214,16 @@ export function NewHomeworkDialog({ classes }: { classes: any[] }) {
       }
     }
     for (const upload of uploadStates) {
-        if (upload.status === 'uploading') {
-            toast.error(`Please wait for all files to finish uploading and become green.`);
-            setIsLoading(false);
-            return;
-        }
-        if (upload.status === 'error') {
-            toast.error(`Please remove or retry all failed uploads.`);
-            setIsLoading(false);
-            return;
-        }
+      if (upload.status === 'uploading') {
+        toast.error(`Please wait for all files to finish uploading and become green.`);
+        setIsLoading(false);
+        return;
+      }
+      if (upload.status === 'error') {
+        toast.error(`Please remove or retry all failed uploads.`);
+        setIsLoading(false);
+        return;
+      }
     }
 
 
@@ -398,11 +398,13 @@ export function NewHomeworkDialog({ classes }: { classes: any[] }) {
             <Dropzone
                 accept={{ '': [] }}
                 maxFiles={10}
-                maxSize={1024 * 1024 * 500}
+                maxSize={1024 * 1024 * 100}
                 minSize={1}
                 onDrop={handleDrop}
-                onError={console.error}
-                src={files}
+                onError={() => {
+                  console.error;
+                  toast.error("File upload exceeded the maximum size of 100MB or maximum number of files (10).");
+                }}                src={files}
             >
               <DropzoneEmptyState />
               <DropzoneContent />
