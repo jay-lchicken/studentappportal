@@ -116,16 +116,16 @@ export default async function Page( )
                 </div>
 
 
-                <div className="p-4 space-y-6">
-                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-2 justify-between">
+                <div className="p-4 space-y-6   ">
+                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-2 justify-between min-h-0 ">
                         <ChartLineMultiple data={chartData} />
                         <Card>
-                            <CardContent className="p-6">
+                            <CardContent className="p-6 h-full flex flex-col flex-shrink ">
                                 <h2 className="text-lg font-semibold mb-2">Subjects</h2>
                                 {subjectsRows.length === 0 ? (
                                     <div className="text-center text-muted-foreground">No subjects created yet.</div>
                                 ) : (
-                                    <div className="max-h-48 overflow-y-auto space-y-2">
+                                    <div className=" overflow-y-auto space-y-2">
                                         {subjectsRows.map(subject => (
                                             <div key={subject.id} className="flex items-center justify-between p-2 rounded-lg border bg-secondary/50">
                                                 <Badge variant="secondary">{subject.subject_name}</Badge>
