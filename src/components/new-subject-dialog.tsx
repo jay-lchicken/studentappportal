@@ -47,6 +47,7 @@ export function NewSubjectDialog() {
       }
 
       toast.success(`Subject "${subjectName}" created successfully!`);
+      window.location.reload();
     } catch (err) {
       toast.error("Failed to create subject. Please try again.");
     } finally {

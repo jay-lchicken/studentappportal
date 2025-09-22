@@ -197,13 +197,12 @@ export function NewExamDialog({ subjects }: { subjects: any[] }) {
       setIsLoading(false);
       return;
     }
+    if (!score || !outOf) {
+      toast.error("Please enter a score");
+    }
+
 
     if (score !== "" || outOf !== "") {
-      if (score === "" || outOf === "") {
-        toast.error("Please enter both score and out of values, or leave both empty");
-        setIsLoading(false);
-        return;
-      }
 
       const scoreNum = parseInt(score);
       const outOfNum = parseInt(outOf);
@@ -361,7 +360,7 @@ export function NewExamDialog({ subjects }: { subjects: any[] }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="score">Score (optional)</Label>
+                <Label htmlFor="score">Score</Label>
                 <Input
                     id="score"
                     type="number"
@@ -373,7 +372,7 @@ export function NewExamDialog({ subjects }: { subjects: any[] }) {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="outOf">Out of (optional)</Label>
+                <Label htmlFor="outOf">Out of</Label>
                 <Input
                     id="outOf"
                     type="number"
@@ -385,19 +384,6 @@ export function NewExamDialog({ subjects }: { subjects: any[] }) {
               </div>
             </div>
 
-            {(score !== "" || outOf !== "") && (
-                <div className="text-sm text-muted-foreground bg-blue-50 p-3 rounded-md">
-                  <div className="flex items-center gap-2">
-                    <InfoIcon className="h-4 w-4" />
-                    <span>
-                  {score !== "" && outOf !== ""
-                      ? `Percentage: ${Math.round((parseInt(score) / parseInt(outOf)) * 100)}%`
-                      : "Please fill both score fields or leave both empty"
-                  }
-                </span>
-                  </div>
-                </div>
-            )}
 
             <div className="grid gap-2">
               <Label>Upload Files (optional)</Label>

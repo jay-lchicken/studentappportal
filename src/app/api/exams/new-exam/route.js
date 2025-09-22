@@ -31,7 +31,7 @@ export async function POST(req) {
 
         const {rows: subjectRows} = await pool.query(
             'SELECT id FROM subjects_exam WHERE id = $1 AND hash_userid = $2',
-            [subject_id, user.sub]
+            [subject_id, hash_userid_email]
         );
 
         if (subjectRows.length === 0) {
