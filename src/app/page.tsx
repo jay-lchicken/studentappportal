@@ -3,10 +3,22 @@ import { ModeToggle } from "@/components/ui/mode-toggle";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {AppleHelloEnglishEffect} from "@/components/ui/shadcn-io/apple-hello-effect";
-
+import pool from "@/lib/db";
+type Homework = {
+            id: string;
+            title: string;
+            description: string;
+            due_date: string;
+            class_id_link: string;
+            personal_hashid: string;
+            date_created: string;
+            is_completed: boolean;
+            class_name?: string;
+        };
 export default async function Home() {
   const session = await auth0.getSession();
   const user = session?.user;
+
 
   return (
     <div className="min-h-svh flex flex-col justify-center items-center bg-gradient-to-b from-white to-slate-100 dark:from-black dark:to-slate-900 p-4 relative">

@@ -12,15 +12,16 @@ import {
 } from "@/components/ui/sidebar"
 import {useRouter, usePathname} from "next/navigation";
 import {ModeToggle} from "@/components/ui/mode-toggle";
+import {NewHomeworkDialogDashboard} from "@/components/new-homework-dialog-dashscreen";
 
 export function NavMain({
-                          items,
+                          items, classes
                         }: {
   items: {
     title: string
     url: string
     icon?: LucideIcon
-  }[]
+  }[], classes?: any[]
 }) {
   const router = useRouter();
   return (
@@ -29,13 +30,7 @@ export function NavMain({
           <SidebarMenu>
             <SidebarMenuItem className="flex items-center gap-2">
               <ModeToggle></ModeToggle>
-              <SidebarMenuButton
-                  tooltip="Quick Create"
-                  className="min-w-8 flex-1 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
-              >
-                <PlusCircleIcon />
-                <span>New Homework</span>
-              </SidebarMenuButton>
+              <NewHomeworkDialogDashboard classes={classes ?? []} />
 
 
             </SidebarMenuItem>

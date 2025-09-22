@@ -47,6 +47,22 @@ export function NewExamDialog({ subjects }: { subjects: any[] }) {
   const [score, setScore] = useState<string>("");
   const [outOf, setOutOf] = useState<string>("");
 
+  function isToday(date: Date): boolean {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  }
+
+  function getCurrentTime(): string {
+    const now = new Date();
+    return now.toTimeString().slice(0, 5);
+  }
+
+  function getMaxTimeForToday(): string {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - 1);
+    return now.toTimeString().slice(0, 5);
+  }
+
   function getDateTime(date: Date | undefined, time: string): Date | undefined {
     if (!date || !time) return undefined;
     const [hour, minute = "0", second = "0"] = time.split(":");
@@ -177,11 +193,12 @@ export function NewExamDialog({ subjects }: { subjects: any[] }) {
 
   function handleDateChange(selectedDate?: Date) {
     setDate(selectedDate);
+
+    if (selectedDate && isToday(selectedDate) && time >= getCurrentTime()) {
+      setTime(getMaxTimeForToday());
+    }
   }
 
-  function handleTimeChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setTime(e.target.value);
-  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     setIsLoading(true);
@@ -197,8 +214,17 @@ export function NewExamDialog({ subjects }: { subjects: any[] }) {
       setIsLoading(false);
       return;
     }
+
+    if (date && isToday(date) && time >= getCurrentTime()) {
+      toast.error("For today's date, please select a time before the current time");
+      setIsLoading(false);
+      return;
+    }
+
     if (!score || !outOf) {
       toast.error("Please enter a score");
+        setIsLoading(false);
+        return;
     }
 
 
@@ -352,7 +378,8 @@ export function NewExamDialog({ subjects }: { subjects: any[] }) {
                     id="time"
                     type="time"
                     value={time}
-                    onChange={handleTimeChange}
+                    onChange={(e) => setTime(e.target.value)}
+                    max={date && isToday(date) ? getMaxTimeForToday() : undefined}
                     required
                 />
               </div>

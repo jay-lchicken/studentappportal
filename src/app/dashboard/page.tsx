@@ -26,6 +26,10 @@ export default async function Page() {
     }
     const hash_userid_email = crypto.createHash('sha256').update(`${user?.email ?? ''}${user?.sub ?? ''}`).digest('hex');
 
+
+
+
+
     let {rows:examRows}= await pool.query(`SELECT er.*,se.subject_name FROM exam_records er
                                                                                 JOIN subjects_exam se
                                                                                      ON er.subject_id::int=se.id
@@ -84,9 +88,15 @@ export default async function Page() {
          ORDER BY h.due_date ASC, h.date_created DESC`,
         [hash_email_userid]
     );
+    const { rows: classesRows } = await pool.query(
+        `SELECT * FROM class_user
+                           JOIN classes ON class_user.class_id = classes.id
+         WHERE class_user.hash_userid = $1`,
+        [hash_email_userid]
+    );
     return (
         <SidebarProvider >
-            <AppSidebar variant="inset" name={user?.name ?? ""} email={user?.email ?? ""}/>
+            <AppSidebar variant="inset" name={user?.name ?? ""} email={user?.email ?? ""} classes={classesRows}/>
             <SidebarInset>
                 <SiteHeader  title={"Dashboard"}/>
                 <div className="flex flex-1 flex-col">

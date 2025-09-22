@@ -98,13 +98,13 @@ export function NavUser({
                                 </div>
                             </div>
                         </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
-                            <DropdownMenuItem>
-                                <UserCircleIcon />
-                                Account
-                            </DropdownMenuItem>
-                        </DropdownMenuGroup>
+                        {/*<DropdownMenuSeparator />*/}
+                        {/*<DropdownMenuGroup>*/}
+                        {/*    <DropdownMenuItem>*/}
+                        {/*        <UserCircleIcon />*/}
+                        {/*        Account*/}
+                        {/*    </DropdownMenuItem>*/}
+                        {/*</DropdownMenuGroup>*/}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => router.push("/auth/logout") }>
                             <LogOutIcon />

@@ -59,16 +59,16 @@ const data = {
     }
   ],
   navSecondary: [
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: SettingsIcon,
-    }
+    // {
+    //   title: "Settings",
+    //   url: "/settings",
+    //   icon: SettingsIcon,
+    // }
   ]
 }
 
 export function AppSidebar(
-  { name, email, ...props }: React.ComponentProps<typeof Sidebar> & { name: string; email: string }
+  { name, email, classes, ...props }: React.ComponentProps<typeof Sidebar> & { name: string; email: string, classes?: any[]}
 ) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -88,7 +88,7 @@ export function AppSidebar(
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={data.navMain} classes={classes} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
 
