@@ -38,7 +38,8 @@ export default async function Page( )
 
     let {rows:subjectsRows}= await pool.query(
         'SELECT * FROM subjects_exam WHERE hash_userid = $1 ORDER BY subject_name',
-        [user?.sub]) as {rows:Subject[]}
+        [hash_userid_email]) as {rows:Subject[]}
+    console.log(hash_userid_email)
 
     let {rows:examRows}= await pool.query(`SELECT er.*,se.subject_name FROM exam_records er
                                                                                 JOIN subjects_exam se
