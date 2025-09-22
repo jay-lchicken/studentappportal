@@ -9,8 +9,9 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {ChartPieDonutText} from "@/components/chart-pie-donut-text";
+import {ChartLineMultiple} from "@/components/chart-line-multiple";
 
-export function SectionCards({homeworks}: {homeworks: any[]}) {
+export function SectionCards({homeworks, data}: {homeworks: any[], data: any[]}) {
   const completedHomework = homeworks.filter((hw) => hw.completed === true);
   const notCompletedHomework = homeworks.filter((hw) => hw.completed !== true);
   return (
@@ -35,8 +36,11 @@ export function SectionCards({homeworks}: {homeworks: any[]}) {
             </CardHeader>
 
           </Card>
+
         </div>
         <ChartPieDonutText homeworks={homeworks}/>
+                                    <ChartLineMultiple data={data} />
+
         {/*<Card className="@container/card">*/}
         {/*  <CardHeader className="relative">*/}
         {/*    <CardDescription>Active Accounts</CardDescription>*/}

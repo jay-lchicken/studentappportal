@@ -15,12 +15,12 @@ import {
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
-interface DeleteExamProps {
-    examId: string;
-    examTitle: string;
+interface DeleteSubjectProps {
+    subjectId: string;
+    subjectName: string;
 }
 
-export function DeleteExam({ examId, examTitle }: DeleteExamProps) {
+export function DeleteSubject({ subjectId, subjectName }: DeleteSubjectProps) {
     const [isDeleting, setIsDeleting] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
@@ -29,21 +29,21 @@ export function DeleteExam({ examId, examTitle }: DeleteExamProps) {
         setIsDeleting(true);
 
         try {
-            const response = await fetch(`/api/exams/delete-exam?id=${examId}`, {
+            const response = await fetch(`/api/subjects?id=${subjectId}`, {
                 method: 'DELETE',
             });
 
             if (response.ok) {
-                toast.success('Exam deleted successfully');
+                toast.success('Subject deleted successfully');
                 setIsOpen(false);
                 router.refresh();
             } else {
                 const errorData = await response.json();
-                toast.error(errorData.error || 'Failed to delete exam');
+                toast.error(errorData.error || 'Failed to delete subject');
             }
         } catch (error) {
-            console.error('Error deleting exam:', error);
-            toast.error('An error occurred while deleting the exam');
+            console.error('Error deleting subject:', error);
+            toast.error('An error occurred while deleting the subject');
         } finally {
             setIsDeleting(false);
         }
@@ -55,16 +55,16 @@ export function DeleteExam({ examId, examTitle }: DeleteExamProps) {
                 <Button
                     variant="outline"
                     size="icon"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 p-0"
                 >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3" />
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Delete Exam</DialogTitle>
+                    <DialogTitle>Delete Subject</DialogTitle>
                     <DialogDescription>
-                        Are you sure you want to delete "{examTitle}"? This action cannot be undone.
+                        Are you sure you want to delete "{subjectName}"? This action cannot be undone and will only work if there are no exams associated with this subject.
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>

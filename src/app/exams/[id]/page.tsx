@@ -3,7 +3,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { FileTextIcon, DownloadIcon } from "lucide-react"
+import { FileTextIcon, DownloadIcon, TrophyIcon } from "lucide-react"
 import { auth0 } from "@/lib/auth0"
 import { notFound } from "next/navigation"
 import { SiteHeader } from "@/components/site-header"
@@ -21,6 +21,8 @@ interface Exam {
     subject_id: string;
     paper_file_paths: FilePath[];
     hash_userid_email: string;
+    score: number | null;
+    out_of: number | null;
 }
 
 interface Files {
@@ -200,6 +202,54 @@ export default async function ExamDetailPage({
                             </CardContent>
                         </Card>
                     </div>
+
+                    {/* Marks Section */}
+                    {exam.score !== null && exam.out_of !== null && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <TrophyIcon className="h-5 w-5" />
+                                    Exam Results
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h4 className="font-medium">Score</h4>
+                                        <p className="text-2xl font-bold text-primary">
+                                            {exam.score} / {exam.out_of}
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <h4 className="font-medium">Percentage</h4>
+                                        <p className="text-2xl font-bold text-primary">
+                                            {Math.round((exam.score / exam.out_of) * 100)}%
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div
+                                        className="bg-primary h-2 rounded-full transition-all duration-300"
+                                        style={{ width: `${(exam.score / exam.out_of) * 100}%` }}
+                                    ></div>
+                                </div>
+                                <div className="flex justify-center">
+                                    <Badge
+                                        variant={
+                                            (exam.score / exam.out_of) >= 0.8 ? "default" :
+                                            (exam.score / exam.out_of) >= 0.6 ? "secondary" :
+                                            "destructive"
+                                        }
+                                        className="text-sm"
+                                    >
+                                        {(exam.score / exam.out_of) >= 0.8 ? "Excellent" :
+                                         (exam.score / exam.out_of) >= 0.6 ? "Good" :
+                                         "Needs Improvement"}
+                                    </Badge>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
             </SidebarInset>
         </SidebarProvider>

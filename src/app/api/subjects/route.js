@@ -66,3 +66,54 @@ export async function GET() {
     );
   }
 }
+
+export async function DELETE(req) {
+  const session = await auth0.getSession();
+
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { searchParams } = new URL(req.url);
+    const subjectId = searchParams.get('id');
+
+    if (!subjectId) {
+      return NextResponse.json({ error: "Subject ID is required" }, { status: 400 });
+    }
+
+    const userId = session.user.sub;
+
+    const examCheck = await pool.query(
+      'SELECT COUNT(*) as count FROM exam_records WHERE subject_id = $1',
+      [subjectId]
+    );
+
+    if (parseInt(examCheck.rows[0].count) > 0) {
+      return NextResponse.json(
+        { error: "Cannot delete subject with associated exams" },
+        { status: 400 }
+      );
+    }
+    const result = await pool.query(
+      'DELETE FROM subjects_exam WHERE id = $1 AND hash_userid = $2 RETURNING *',
+      [subjectId, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return NextResponse.json({ error: "Subject not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Subject deleted successfully"
+    });
+
+  } catch (error) {
+    console.error("Error deleting subject:", error);
+    return NextResponse.json(
+      { error: "Failed to delete subject" },
+      { status: 500 }
+    );
+  }
+}
