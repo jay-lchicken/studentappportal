@@ -1,4 +1,3 @@
-md
 # KOKO Student App Portal (StudentAppPortal)
 [![Ask DeepWiki](https://devin.ai/assets/askdeepwiki.png)](https://deepwiki.com/jay-lchicken/studentappportal)
 
