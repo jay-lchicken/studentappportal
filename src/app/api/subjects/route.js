@@ -120,8 +120,8 @@ export async function DELETE(req) {
 
 
     const examCheck = await pool.query(
-        'SELECT COUNT(*) as count FROM exam_records WHERE subject_id = $1 AND hash_userid = $2',
-        [subjectId, hash]
+        'SELECT COUNT(*) as count FROM exam_records WHERE subject_id = $1 ',
+        [subjectId]
     );
 
     if (parseInt(examCheck.rows[0].count) > 0) {
@@ -130,9 +130,10 @@ export async function DELETE(req) {
           { status: 400 }
       );
     }
+    console.log(hash)
     const result = await pool.query(
         'DELETE FROM subjects_exam WHERE id = $1 AND hash_userid = $2 RETURNING *',
-        [subjectId, userId]
+        [subjectId, hash]
     );
 
     if (result.rows.length === 0) {
