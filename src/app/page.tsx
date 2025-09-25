@@ -27,14 +27,13 @@ export default async function Home() {
       </div>
 
       <div className="w-full max-w-lg flex flex-col items-center space-y-6 pt-20">
-    {/*      <div className="flex w-full h-screen flex-col justify-center items-center gap-16">*/}
-    {/*  /!*<AppleHelloEnglishEffect speed={1.1} />*!/*/}
-    {/*</div>*/}
-        <h1 className="text-4xl font-bold text-center">
-          The Future Student Management System Is Here
+          <div className="flex w-full flex-col justify-center items-center gap-16">
+      <AppleHelloEnglishEffect speed={1.1} />
+    </div>
+        <h1 className="text-4xl font-bold text-center">Koko
         </h1>
         <p className="text-lg text-muted-foreground text-center">
-          Start managing your student life now with a click of a button!
+          Stay organised. Stress less.
         </p>
 
         <div className="flex flex-row w-full space-x-4">
