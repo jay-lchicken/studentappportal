@@ -41,7 +41,7 @@ export default async function ClassesGrid({hash}: { hash: string }) {
 
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 p-4">
             {rows.map((row: any) => (
                 <Card className="flex-1" key={row.class_id}>
                     <div  className="flex flex-row items-center justify-between">
@@ -60,7 +60,7 @@ export default async function ClassesGrid({hash}: { hash: string }) {
                         )}
 
 
-                        <CardHeader className={"ml-[-40px]"}>
+                        <CardHeader className={"ml-[-90px]"}>
                             <CardTitle>{row.class_name}</CardTitle>
                             <CardDescription>Creator: {row.name || "No name"}</CardDescription>
 
