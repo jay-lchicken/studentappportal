@@ -95,7 +95,7 @@ export async function POST(req) {
     const new_user = await pool.query(`
       INSERT INTO class_user (hash_userid, class_id, email, name)
       VALUES ($1, $2, $3, $4)
-        RETURNING *`, [new_hash,class_id, foundUsers[0].email, foundUsers[0].given_name]);
+        RETURNING *`, [new_hash,class_id, foundUsers[0].email, foundUsers[0].name]);
 
 
 
